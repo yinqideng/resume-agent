@@ -1,0 +1,197 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>邓殷琪 · 简历问答</title>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  :root {
+    --ink: #1a1612; --cream: #f5f0e8; --warm: #e8dfd0;
+    --accent: #c4622d; --accent2: #8b4513; --muted: #7a6f63;
+  }
+  body { font-family: 'DM Sans', sans-serif; background: var(--cream); color: var(--ink); min-height: 100vh; display: flex; flex-direction: column; }
+  header { padding: 2.5rem 3rem 2rem; border-bottom: 1px solid var(--warm); display: flex; align-items: flex-end; gap: 2rem; }
+  .header-name { font-family: 'Playfair Display', serif; font-size: clamp(2rem, 5vw, 3.2rem); font-weight: 700; line-height: 1; }
+  .header-name span { color: var(--accent); }
+  .header-meta { display: flex; flex-direction: column; gap: 0.3rem; padding-bottom: 0.2rem; }
+  .header-tag { font-size: 0.75rem; font-weight: 500; letter-spacing: 0.12em; text-transform: uppercase; color: var(--muted); }
+  .header-sub { font-size: 0.9rem; color: var(--muted); }
+  .container { flex: 1; display: flex; flex-direction: column; max-width: 800px; width: 100%; margin: 0 auto; padding: 0 1.5rem; }
+  .suggestions { padding: 1.8rem 0 1rem; display: flex; flex-wrap: wrap; gap: 0.6rem; }
+  .suggestions-label { width: 100%; font-size: 0.75rem; letter-spacing: 0.1em; text-transform: uppercase; color: var(--muted); margin-bottom: 0.3rem; }
+  .suggestion-btn { background: white; border: 1px solid var(--warm); border-radius: 100px; padding: 0.5rem 1rem; font-family: 'DM Sans', sans-serif; font-size: 0.82rem; color: var(--ink); cursor: pointer; transition: all 0.2s; }
+  .suggestion-btn:hover { background: var(--accent); color: white; border-color: var(--accent); }
+  .chat-area { overflow-y: auto; padding: 1rem 0 1.5rem; display: flex; flex-direction: column; gap: 1.5rem; min-height: 280px; max-height: 50vh; }
+  .message { display: flex; gap: 0.75rem; animation: fadeUp 0.3s ease; }
+  @keyframes fadeUp { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: translateY(0); } }
+  .message.user { flex-direction: row-reverse; }
+  .avatar { width: 32px; height: 32px; border-radius: 50%; flex-shrink: 0; display: flex; align-items: center; justify-content: center; font-size: 0.7rem; font-weight: 600; margin-top: 2px; }
+  .avatar.bot { background: var(--accent); color: white; font-family: 'Playfair Display', serif; }
+  .avatar.user { background: var(--ink); color: var(--cream); }
+  .bubble { max-width: 80%; padding: 0.9rem 1.2rem; border-radius: 16px; font-size: 0.92rem; line-height: 1.65; }
+  .message.bot .bubble { background: white; border: 1px solid var(--warm); border-top-left-radius: 4px; }
+  .message.user .bubble { background: var(--ink); color: var(--cream); border-top-right-radius: 4px; }
+  .typing { display: flex; align-items: center; gap: 4px; padding: 0.9rem 1.2rem; }
+  .typing span { width: 6px; height: 6px; background: var(--muted); border-radius: 50%; animation: bounce 1.2s infinite; }
+  .typing span:nth-child(2) { animation-delay: 0.2s; }
+  .typing span:nth-child(3) { animation-delay: 0.4s; }
+  @keyframes bounce { 0%, 60%, 100% { transform: translateY(0); } 30% { transform: translateY(-5px); } }
+  .input-area { padding: 1.2rem 0 2rem; border-top: 1px solid var(--warm); display: flex; gap: 0.75rem; align-items: flex-end; background: var(--cream); position: sticky; bottom: 0; }
+  textarea { flex: 1; font-family: 'DM Sans', sans-serif; font-size: 0.9rem; border: 1px solid var(--warm); border-radius: 12px; padding: 0.75rem 1rem; resize: none; background: white; color: var(--ink); outline: none; transition: border-color 0.2s; line-height: 1.5; min-height: 46px; max-height: 120px; }
+  textarea:focus { border-color: var(--accent); }
+  textarea::placeholder { color: #b5a99a; }
+  .send-btn { width: 46px; height: 46px; border-radius: 12px; background: var(--accent); border: none; cursor: pointer; display: flex; align-items: center; justify-content: center; flex-shrink: 0; transition: background 0.2s, transform 0.1s; }
+  .send-btn:hover { background: var(--accent2); }
+  .send-btn:active { transform: scale(0.95); }
+  .send-btn:disabled { background: var(--warm); cursor: not-allowed; }
+  .send-btn svg { width: 18px; height: 18px; fill: white; }
+  .api-notice { background: #fff8e1; border: 1px solid #ffe082; border-radius: 10px; padding: 0.8rem 1.1rem; font-size: 0.82rem; color: #795548; margin: 1rem 0 0; line-height: 1.5; }
+  .api-notice strong { color: var(--accent); }
+  .key-row { display: flex; gap: 0.5rem; margin-top: 0.6rem; }
+  .key-row input { flex: 1; font-family: 'DM Sans', sans-serif; font-size: 0.82rem; border: 1px solid #ffe082; border-radius: 8px; padding: 0.4rem 0.7rem; background: white; color: var(--ink); outline: none; }
+  .key-row input:focus { border-color: var(--accent); }
+  .key-save-btn { background: var(--accent); color: white; border: none; border-radius: 8px; padding: 0.4rem 0.9rem; font-size: 0.82rem; cursor: pointer; font-family: 'DM Sans', sans-serif; }
+  .key-save-btn:hover { background: var(--accent2); }
+  @media (max-width: 600px) { header { padding: 1.5rem; flex-direction: column; align-items: flex-start; gap: 0.5rem; } .container { padding: 0 1rem; } .bubble { max-width: 90%; } }
+</style>
+</head>
+<body>
+<header>
+  <div class="header-name">邓<span>殷</span>琪</div>
+  <div class="header-meta">
+    <div class="header-tag">Resume · AI Assistant</div>
+    <div class="header-sub">生态伙伴总监 · B2B大客户商业化 · AI产品落地</div>
+  </div>
+</header>
+
+<div class="container">
+  <div class="suggestions">
+    <div class="suggestions-label">可以这样问</div>
+    <button class="suggestion-btn" onclick="ask(this)">你有哪些核心工作经验？</button>
+    <button class="suggestion-btn" onclick="ask(this)">B2B销售上有哪些量化成果？</button>
+    <button class="suggestion-btn" onclick="ask(this)">你了解AI和技术吗？</button>
+    <button class="suggestion-btn" onclick="ask(this)">教育背景是什么？</button>
+    <button class="suggestion-btn" onclick="ask(this)">最擅长什么类型的岗位？</button>
+  </div>
+
+  <div class="chat-area" id="chat"></div>
+
+  <div class="input-area">
+    <textarea id="input" rows="1" placeholder="向我提问关于邓殷琪的任何问题…" onkeydown="handleKey(event)" oninput="autoResize(this)"></textarea>
+    <button class="send-btn" id="send-btn" onclick="send()" title="发送">
+      <svg viewBox="0 0 24 24"><path d="M2.01 21L23 12 2.01 3 2 10l15 2-15 2z"/></svg>
+    </button>
+  </div>
+</div>
+
+<script>
+const RESUME = `姓名：邓殷琪 | 出生：1998年8月 | 现居地：深圳/广州
+联系：13925049799 | 13925049799@163.com
+学历：深圳大学本科（市场营销）；上海交通大学自考（计算机科学与技术，2024至今）
+认证：阿里云大模型ACP认证、云计算ACA认证 | 工作年限：6年
+
+简介：5年B2B大客户商业化经验，能快速进入新场景、深度分析环境并制定打法，具备从0搭建商业化体系与持续经营高价值客户关系的复合能力；具备将AI产品价值传达、落地的实战经验。
+
+【工作经历】
+
+2024.07—2025.11 深圳不停科技有限公司 | 生态伙伴总监
+以AI机器人为核心，融合BI与云端大模型能力，对国际KA商业化全链路及全球渠道体系负责。
+KA开发：项目中标率100%，KA复购率超80%，回款准时率100%，采购周期平均压缩67%
+- 酒店：2个月完成亚太TOP4酒店集团KD开发；1年推动中东KA启动3个采购项目
+- 零售：2周完成澳新TOP3 KA的CEO及3家NKA采购负责人建联；1年推动TOP1客户完成2次采购
+- 航空：1个月完成全球TOP3中两家航空公司KD开发，推动2家KA提前采购落地
+渠道体系：从0搭建全球经销商体系，渠道Pipeline贡献占比30%；全球1000+潜在经销商盘点
+
+2019.12—2025.01 易简生活（深圳）贸易有限责任公司 | 创始人
+开发300+品牌方客户，10000+账号、100+MCN渠道资源，总体ROI 3+
+2024年在创富港内部创业，推动AI相关新业务方向
+
+2021.12—2022.12 周生生（中国）商业有限公司 | 商业分析管培生（考核A）
+覆盖亚太1000+直营门店，业务与技术转化核心角色，推进全渠道业务流程分析与系统方案落地
+
+在校实习：腾讯TEG产品经理、工商银行对公业务、仲量联行项目助理等
+
+【教育】
+2016—2020 深圳大学 市场营销（全日制本科）
+2024—至今 上海交通大学 计算机科学与技术（自考）
+
+【荣誉】首批中共党员、优秀共青团员、深圳大学校园建设提案一等奖、灯塔项目一等奖`;
+
+const SYSTEM = `你是邓殷琪的个人简历AI助手，帮助HR和招聘方了解她的背景与能力。
+基于以下简历信息用中文专业友好地回答问题。超出简历范围的内容请诚实说明，不要编造。回答简洁有重点，善用具体数字和案例。
+简历：\n${RESUME}`;
+
+let apiKey = 'sk-fb433edc25544cd185f217e36b12a776';
+let history = [];
+let busy = false;
+
+(function init() {
+  if (apiKey) {
+    document.getElementById('api-notice').style.display = 'none';
+    addMsg('bot', '你好！我是邓殷琪的简历助手，可以回答关于她的经历、技能、成果等任何问题，请问您想了解什么？');
+  }
+})();
+
+function saveKey() {
+  const v = document.getElementById('api-key-input').value.trim();
+  if (!v.startsWith('sk-')) { alert('请输入有效的 DeepSeek API Key'); return; }
+  apiKey = v;
+  localStorage.setItem('resume_ak', v);
+  document.getElementById('api-notice').style.display = 'none';
+  addMsg('bot', '✓ 配置成功！你好，我是邓殷琪的简历助手，可以回答关于她的经历、技能、成果等任何问题，请问您想了解什么？');
+}
+
+function addMsg(role, text) {
+  const chat = document.getElementById('chat');
+  const d = document.createElement('div');
+  d.className = `message ${role}`;
+  d.innerHTML = `<div class="avatar ${role}">${role === 'bot' ? '邓' : 'HR'}</div><div class="bubble">${text.replace(/\n/g, '<br>')}</div>`;
+  chat.appendChild(d);
+  chat.scrollTop = chat.scrollHeight;
+}
+
+function showTyping() {
+  const chat = document.getElementById('chat');
+  const d = document.createElement('div');
+  d.className = 'message bot'; d.id = 'typing';
+  d.innerHTML = `<div class="avatar bot">邓</div><div class="bubble typing"><span></span><span></span><span></span></div>`;
+  chat.appendChild(d); chat.scrollTop = chat.scrollHeight;
+}
+
+async function send() {
+  if (!apiKey) { alert('请先输入 API Key'); return; }
+  const inp = document.getElementById('input');
+  const text = inp.value.trim();
+  if (!text || busy) return;
+  inp.value = ''; inp.style.height = 'auto';
+  addMsg('user', text);
+  history.push({ role: 'user', content: text });
+  busy = true;
+  document.getElementById('send-btn').disabled = true;
+  showTyping();
+  try {
+    const res = await fetch('https://api.deepseek.com/anthropic/v1/messages', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', 'x-api-key': apiKey, 'anthropic-version': '2023-06-01' },
+      body: JSON.stringify({ model: 'deepseek-chat', max_tokens: 800, system: SYSTEM, messages: history })
+    });
+    const data = await res.json();
+    document.getElementById('typing')?.remove();
+    if (data.error) { addMsg('bot', `❌ ${data.error.message}`); history.pop(); }
+    else { const r = data.content[0].text; addMsg('bot', r); history.push({ role: 'assistant', content: r }); }
+  } catch(e) {
+    document.getElementById('typing')?.remove();
+    addMsg('bot', '❌ 网络错误，请检查 API Key 是否正确。'); history.pop();
+  }
+  busy = false;
+  document.getElementById('send-btn').disabled = false;
+}
+
+function ask(btn) { document.getElementById('input').value = btn.textContent; send(); }
+function handleKey(e) { if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); send(); } }
+function autoResize(el) { el.style.height = 'auto'; el.style.height = Math.min(el.scrollHeight, 120) + 'px'; }
+</script>
+</body>
+</html>
